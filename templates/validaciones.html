@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Validación | Sistema de Boletas</title><link rel="stylesheet" href="{{ url_for('static',filename='css/sistema.css') }}"></head><body>
+<header class="cabecera-app"><div class="cabecera-app-interior"><a class="marca" href="{{ url_for('index') }}"><span class="marca-icono">P</span><span><strong>P Y S DEL MAR PERU S.A.C.</strong><small>Gestión de boletas de pago</small></span></a><nav class="navegacion"><a href="{{ url_for('index') }}">Inicio</a><a href="{{ url_for('historial') }}">Historial</a><a href="{{ url_for('resultados') }}">Resultados</a></nav></div></header>
+<main class="contenedor"><section class="presentacion"><span class="capsula">CONTROL DE IMPORTACIÓN</span><h1>Revisión de planilla · Semana {{ datos.semana }}</h1><p>{{ datos.periodo }} · {{ datos.total_trabajadores }} trabajadores · {{ datos.alertas|length }} alerta(s)</p></section>
+<section class="panel"><div class="panel-cabecera"><div><h2>Resultados del control</h2><p class="subtitulo">Las validaciones no cambian los sueldos, las toneladas, las horas, los descuentos ni el neto del Excel.</p></div><div class="acciones"><a class="boton boton-secundario" href="{{ url_for('resultados') }}">Ver resultados</a><a class="boton boton-secundario" href="{{ url_for('historial') }}">Historial</a></div></div>
+{% set graves = datos.alertas|selectattr('nivel','equalto','error')|list %}
+{% set avisos = datos.alertas|selectattr('nivel','equalto','aviso')|list %}
+<div class="estadisticas" style="grid-template-columns:repeat(3,minmax(0,1fr))"><div class="estadistica"><span class="nombre">Trabajadores</span><span class="valor">{{ datos.total_trabajadores }}</span></div><div class="estadistica"><span class="nombre">Errores</span><span class="valor" style="color:#ac3030">{{ graves|length }}</span></div><div class="estadistica"><span class="nombre">Observaciones</span><span class="valor">{{ avisos|length }}</span></div></div>
+{% if graves %}<p class="mensaje-error"><strong>Se detectaron errores.</strong> Revisa las filas indicadas en tu Excel original y vuelve a importarlo corregido. Puedes consultar los resultados, pero no emitir boletas de esta carga.</p>{% elif avisos %}<p class="mensaje-aviso">Se encontraron observaciones. Revísalas antes de imprimir; pueden responder a reglas propias de tu planilla.</p>{% else %}<p class="mensaje-ok">No se encontraron inconsistencias con los controles automáticos implementados.</p>{% endif %}
+{% with mensajes = get_flashed_messages() %}{% if mensajes %}<p class="mensaje-aviso">{{ mensajes|join(' · ') }}</p>{% endif %}{% endwith %}
+<div class="barra-tabla"><input class="busqueda" id="filtrar" type="search" placeholder="Buscar documento o concepto" aria-label="Filtrar incidencias"><span class="contador-tabla">Las filas corresponden al Excel de origen.</span></div>
+<div class="tabla-contenedor"><table class="tabla-datos"><thead><tr><th>Severidad</th><th>Fila</th><th>Documento</th><th>Concepto</th><th>Detalle</th></tr></thead><tbody>
+{% for a in datos.alertas %}<tr class="fila-alerta"><td><span class="etiqueta-tipo {{ 'tipo-error' if a.nivel=='error' else '' }}">{{ a.nivel|upper }}</span></td><td>{{ a.fila }}</td><td>{{ a.dni }}</td><td>{{ a.asunto }}</td><td>{{ a.detalle }}</td></tr>
+{% else %}<tr><td colspan="5">No se encontraron alertas.</td></tr>{% endfor %}
+</tbody></table></div>
+<p class="texto-ayuda" style="margin-top:16px">Para corregir importes, modifica la planilla de origen y vuelve a cargar el archivo. No se actualizan cálculos salariales desde este sistema.</p>
+<div class="acciones"><a class="boton" href="{{ url_for('resultados') }}">Continuar a resultados</a><a class="boton boton-secundario" href="{{ url_for('index') }}">Cargar Excel corregido</a></div>
+</section></main><script>
+const campo=document.getElementById('filtrar');
+campo.addEventListener('input',()=>{const q=campo.value.toLocaleLowerCase('es').trim();document.querySelectorAll('.fila-alerta').forEach(tr=>tr.hidden=!tr.textContent.toLocaleLowerCase('es').includes(q));});
+</script></body></html>

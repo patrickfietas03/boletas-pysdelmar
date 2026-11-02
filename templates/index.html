@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio | Sistema de Boletas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sistema.css') }}">
+</head>
+<body>
+<header class="cabecera-app">
+    <div class="cabecera-app-interior">
+        <a class="marca" href="{{ url_for('index') }}">
+            <span class="marca-icono">P</span>
+            <span><strong>P Y S DEL MAR PERU S.A.C.</strong><small>Gestión de boletas de pago</small></span>
+        </a>
+        <nav class="navegacion" aria-label="Navegación">
+            <a href="{{ url_for('index') }}" aria-current="page">Inicio</a>
+            <a href="{{ url_for('resultados') }}">Última planilla</a>
+<a href="{{ url_for('historial') }}">Historial</a>
+        <form method="post" action="{{ url_for('salir') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="boton boton-secundario boton-pequeno" type="submit">Salir</button></form>
+</nav>
+    </div>
+</header>
+<main class="contenedor">
+    <div class="cargar-contenedor">
+        <section class="presentacion">
+            <span class="capsula">MÓDULO DE PLANILLAS</span>
+            <h1>Boletas de pago semanales</h1>
+            <p>Importa la información de la planilla para consultar y emitir las boletas de los trabajadores.</p>
+        </section>
+        <section class="panel" aria-labelledby="titulo-carga">
+            <div class="panel-cabecera">
+                <div>
+                    <h2 id="titulo-carga">Importar archivo de planilla</h2>
+                    <p class="subtitulo">Selecciona el Excel correspondiente a la semana que vas a procesar.</p>
+                </div>
+                <a href="{{ url_for('descargar_plantilla') }}" class="boton boton-secundario" download>
+                    ↓ Descargar plantilla Excel
+                </a>
+            </div>
+            {% with mensajes = get_flashed_messages() %}
+                {% if mensajes %}
+                    <p class="texto-ayuda" role="alert">{{ mensajes|join(' · ') }}</p>
+                {% endif %}
+            {% endwith %}
+            <form action="{{ url_for('procesar') }}" method="post" enctype="multipart/form-data" onsubmit="mostrarCarga()">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <div class="campo-subida">
+                    <span class="icono-subida" aria-hidden="true">↑</span>
+                    <label for="excel_destajo">Archivo Excel</label>
+                    <span class="texto-ayuda">Selecciona un archivo .xlsx</span>
+                    <input id="excel_destajo" type="file" name="excel_destajo" accept=".xlsx" required>
+                    <button id="btnProcesar" type="submit" class="boton">Procesar planilla</button>
+                </div>
+                <p class="estado-carga" id="cargando" role="status">Procesando archivo…</p>
+            </form>
+        </section>
+        <p class="pie-app">P Y S DEL MAR PERU S.A.C. · Sistema interno de boletas</p>
+    </div>
+</main>
+<script>
+function mostrarCarga() {
+    const boton = document.getElementById('btnProcesar');
+    boton.disabled = true;
+    boton.textContent = 'Procesando…';
+    document.getElementById('cargando').style.display = 'block';
+}
+</script>
+</body>
+</html>

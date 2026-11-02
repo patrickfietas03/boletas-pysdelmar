@@ -1,0 +1,4228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>
+    Boletas Masivas - P Y S DEL MAR PERU S.A.C.
+</title>
+
+
+<!-- =========================================================
+     LIBRERÍAS PARA GENERAR PDF
+========================================================= -->
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+</script>
+
+<script
+    src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+</script>
+
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+html,
+body{
+    margin:0;
+    padding:0;
+}
+
+body{
+    background:#e5e5e5;
+    color:#000;
+    font-size:8px;
+    line-height:1.2;
+}
+
+
+/* =========================================================
+   PANEL DE CONTROL
+========================================================= */
+
+.panel-control{
+    width:287mm;
+    margin:8px auto;
+    background:#fff;
+    border:1px solid #bbb;
+    padding:10px 14px;
+    border-radius:5px;
+}
+
+.titulo-control{
+    text-align:center;
+    font-size:15px;
+    font-weight:bold;
+    margin-bottom:10px;
+    color:#123b63;
+}
+
+.controles-superiores{
+    display:flex;
+    gap:8px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.controles-superiores input{
+    height:34px;
+    border:1px solid #aaa;
+    border-radius:4px;
+    padding:0 10px;
+    font-size:12px;
+    flex:1;
+    min-width:250px;
+}
+
+.boton-control{
+    background:#123b63;
+    color:#fff;
+    border:none;
+    padding:8px 14px;
+    border-radius:4px;
+    cursor:pointer;
+    font-weight:bold;
+    font-size:12px;
+}
+
+.boton-control:hover{
+    background:#0d2d4b;
+}
+
+.boton-control:disabled{
+    opacity:.65;
+    cursor:not-allowed;
+}
+
+.boton-verde{
+    background:#166534;
+}
+
+.boton-verde:hover{
+    background:#14532d;
+}
+
+.boton-pdf{
+    background:#7c2d12;
+}
+
+.boton-pdf:hover{
+    background:#651f0d;
+}
+
+.boton-rojo{
+    background:#b91c1c;
+}
+
+.boton-rojo:hover{
+    background:#991b1b;
+}
+
+.contador{
+    margin-top:8px;
+    font-size:12px;
+    font-weight:bold;
+}
+
+.lista-trabajadores{
+    margin-top:8px;
+    max-height:220px;
+    overflow-y:auto;
+    border:1px solid #ccc;
+    background:#fafafa;
+}
+
+.trabajador-item{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 10px;
+    border-bottom:1px solid #e0e0e0;
+    cursor:pointer;
+    font-size:11px;
+}
+
+.trabajador-item:last-child{
+    border-bottom:none;
+}
+
+.trabajador-item:hover{
+    background:#eef4f8;
+}
+
+.trabajador-item input{
+    width:16px;
+    height:16px;
+}
+
+.dato-trabajador{
+    display:flex;
+    flex-direction:column;
+    line-height:1.25;
+}
+
+.nombre-trabajador{
+    font-weight:bold;
+}
+
+.dni-trabajador{
+    color:#555;
+    font-size:10px;
+}
+
+.areas-trabajador{
+    color:#555;
+    font-size:9px;
+}
+
+
+/* =========================================================
+   HOJA A4
+========================================================= */
+
+.pagina{
+    width:287mm;
+    height:200mm;
+    margin:0 auto 5mm auto;
+    background:#fff;
+    padding:2mm;
+    border:1px solid #aaa;
+    overflow:hidden;
+}
+
+.contenedor-boletas{
+    width:100%;
+    height:196mm;
+    display:flex;
+    gap:4mm;
+    align-items:flex-start;
+}
+
+.columna-boleta{
+    width:calc(50% - 2mm);
+    height:196mm;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+}
+
+
+/* =========================================================
+   CAJA PRINCIPAL
+========================================================= */
+
+.caja-principal{
+    width:100%;
+    height:168mm;
+    min-height:168mm;
+    max-height:168mm;
+    border:1px solid #000;
+    padding:2.3mm 3mm;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+    page-break-inside:avoid;
+    break-inside:avoid;
+}
+
+
+/* =========================================================
+   ENCABEZADO
+========================================================= */
+
+.encabezado-superior{
+    display:grid;
+    grid-template-columns:28mm 1fr 28mm;
+    align-items:start;
+    width:100%;
+    height:20mm;
+    min-height:20mm;
+    max-height:20mm;
+    margin-bottom:3mm;
+    padding-bottom:1.8mm;
+    border-bottom:1px solid #777;
+    flex-shrink:0;
+    font-family:Tahoma,Arial,sans-serif;
+}
+
+.logo-contenedor{
+    grid-column:1;
+    width:28mm;
+    height:18mm;
+    text-align:center;
+    padding:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.logo-img{
+    display:block;
+    margin:0 auto;
+    max-width:24mm;
+    max-height:14mm;
+    width:auto;
+    height:auto;
+    object-fit:contain;
+}
+
+.titulo-centro{
+    grid-column:2;
+    width:100%;
+    text-align:center;
+    align-self:start;
+    padding:1mm 1mm 0 1mm;
+    font-family:Tahoma,Arial,sans-serif;
+}
+
+.titulo-principal{
+    font-family:Tahoma,Arial,sans-serif;
+    font-size:10.3px;
+    font-weight:bold;
+    text-decoration:none;
+    color:#0000cc;
+    line-height:1.22;
+    text-align:center;
+    display:block;
+    width:100%;
+}
+
+.empresa-nombre{
+    font-family:Tahoma,Arial,sans-serif;
+    font-size:9.4px;
+    font-weight:bold;
+    margin-top:2.5mm;
+    line-height:1.15;
+    text-align:center;
+    display:block;
+    width:100%;
+}
+
+
+/* =========================================================
+   DATOS
+========================================================= */
+
+.grid-datos{
+    width:100%;
+    border-collapse:collapse;
+    border:none;
+    margin-bottom:1.5mm;
+    table-layout:fixed;
+    flex-shrink:0;
+}
+
+.grid-datos td{
+    height:4.4mm;
+    padding:.6mm 1.3mm;
+    vertical-align:middle;
+    border:none;
+    line-height:1.05;
+    font-size:7.8px;
+}
+
+.grid-datos tr:first-child td{
+    border-bottom:1px solid #777;
+}
+
+.negrita{
+    font-weight:bold;
+}
+
+.texto-rojo{
+    color:#cc0000;
+    font-weight:bold;
+}
+
+.resaltado-amarillo{
+    background:#ffff00;
+    font-weight:bold;
+    padding:0 2px;
+}
+
+.subrayado{
+    text-decoration:none;
+}
+
+.centro{
+    text-align:center;
+}
+
+.text-right{
+    text-align:right;
+    padding-right:1.8mm!important;
+}
+
+
+/* =========================================================
+   DETALLE POR ÁREA
+========================================================= */
+
+.tabla-areas{
+    width:100%;
+    border-collapse:collapse;
+    table-layout:fixed;
+    margin:0 0 1.5mm 0;
+    flex-shrink:0;
+}
+
+.tabla-areas thead tr{
+    border-top:1px solid #777;
+    border-bottom:1px solid #777;
+}
+
+.tabla-areas th{
+    height:3.8mm;
+    background:#f3f3f3;
+    text-align:center;
+    padding:.45mm 1mm;
+    font-size:6.8px;
+    line-height:1.1;
+    vertical-align:middle;
+    border:none;
+}
+
+.tabla-areas td{
+    height:2.7mm;
+    padding:.5mm 1mm;
+    font-size:6.7px;
+    line-height:1.2;
+    vertical-align:middle;
+    border:none;
+    text-align:center;
+}
+
+.tabla-areas .celda-area{
+    text-align:center;
+    overflow-wrap:break-word;
+}
+
+.tabla-areas .celda-cantidad,
+.tabla-areas .celda-valores{
+    text-align:center;
+}
+
+.tabla-areas .linea-detalle{
+    display:block;
+    line-height:1.2;
+    margin:.15mm 0;
+}
+
+
+/* =========================================================
+   TABLA FINANCIERA
+========================================================= */
+
+.tabla-financiera{
+    width:100%;
+    border-collapse:collapse;
+    border:none;
+    table-layout:fixed;
+    margin-top:0;
+    flex-shrink:0;
+}
+
+.tabla-financiera thead tr{
+    border-top:1px solid #777;
+    border-bottom:1px solid #777;
+}
+
+.tabla-financiera th{
+    height:4.7mm;
+    background:#f3f3f3;
+    text-align:left;
+    padding:.7mm 1.3mm;
+    font-size:7.8px;
+    line-height:1;
+    border:none;
+}
+
+.tabla-financiera td{
+    height:3.55mm;
+    padding:.4mm 1.3mm;
+    line-height:1;
+    vertical-align:middle;
+    font-size:7.5px;
+    border:none;
+}
+
+.tabla-financiera tr{
+    page-break-inside:avoid;
+    break-inside:avoid;
+}
+
+.linea-arriba td{
+    border-top:1px solid #777!important;
+    padding-top:1mm;
+}
+
+.fila-espaciadora td{
+    height:1.4mm;
+    padding:0;
+    border:none!important;
+}
+
+.fila-neto{
+    background:#eeeeee;
+    font-weight:bold;
+}
+
+.fila-neto td{
+    height:4.5mm;
+    border-top:1px solid #777!important;
+    border-bottom:1px solid #777!important;
+}
+
+.espaciador-flexible{
+    flex-grow:1;
+    min-height:1mm;
+}
+
+
+/* =========================================================
+   FIRMAS
+========================================================= */
+
+.seccion-firmas{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-top:1.5mm;
+    padding:0 5mm;
+    flex-shrink:0;
+}
+
+.bloque-firma{
+    width:40%;
+    text-align:center;
+}
+
+.contenedor-imagen-firma{
+    height:10mm;
+    position:relative;
+}
+
+.firma-img{
+    position:absolute;
+    bottom:0;
+    left:50%;
+    transform:translateX(-50%);
+    max-width:31mm;
+    max-height:12mm;
+    width:auto;
+    height:auto;
+    mix-blend-mode:multiply;
+}
+
+.linea-texto-firma{
+    border-top:1px solid #000;
+    padding-top:.4mm;
+    font-size:6.9px;
+    line-height:1.1;
+    text-align:center;
+}
+
+.nombre-firma-boleta{
+    display:block;
+    font-weight:bold;
+    font-size:6.9px;
+    line-height:1.1;
+}
+
+.dni-firma-boleta{
+    display:block;
+    font-size:6.7px;
+    line-height:1.1;
+    margin-top:.2mm;
+}
+
+
+/* =========================================================
+   RECIBO
+========================================================= */
+
+.caja-recibo{
+    width:100%;
+    height:26mm;
+    min-height:26mm;
+    max-height:26mm;
+    border:1px solid #000;
+    padding:1.8mm 3mm;
+    margin-top:2mm;
+    background:#fff;
+    font-size:7.5px;
+    line-height:1.2;
+    overflow:hidden;
+    page-break-inside:avoid;
+    break-inside:avoid;
+}
+
+.titulo-recibo{
+    font-family:Tahoma,Arial,sans-serif;
+    font-size:8.2px;
+    font-weight:bold;
+    text-decoration:none;
+    margin-bottom:1.3mm;
+    line-height:1.05;
+}
+
+.recibo-contenido{
+    width:100%;
+    display:flex;
+    align-items:stretch;
+    gap:4mm;
+    height:calc(100% - 5mm);
+}
+
+.recibo-texto-izquierda{
+    width:72%;
+    padding-right:1mm;
+    line-height:1.22;
+    font-size:7.5px;
+}
+
+.texto-recibo{
+    margin-bottom:.9mm;
+    line-height:1.22;
+    text-align:left;
+    font-size:7.5px;
+}
+
+.recibo-firma-derecha{
+    width:28%;
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+    align-items:center;
+    text-align:center;
+}
+
+.espacio-firma{
+    width:100%;
+    height:5mm;
+}
+
+.linea-firma{
+    width:92%;
+    border-top:1px solid #000;
+    padding-top:.2mm;
+    text-align:center;
+    font-size:7px;
+    line-height:1.05;
+}
+
+.nombre-firma{
+    display:block;
+    font-weight:bold;
+    font-size:7px;
+    line-height:1.05;
+    margin:0;
+    padding:0;
+}
+
+.dni-firma{
+    display:block;
+    font-weight:normal;
+    font-size:6.8px;
+    line-height:1.05;
+    margin:.2mm 0 0;
+    padding:0;
+}
+
+
+/* =========================================================
+   CTS
+========================================================= */
+
+.texto-legal-cts{
+    text-align:justify;
+    font-size:7.9px;
+    line-height:1.38;
+    margin-top:.5mm;
+    margin-bottom:2mm;
+    padding:0 .5mm;
+    flex-shrink:0;
+}
+
+.titulo-cts{
+    font-family:Tahoma,Arial,sans-serif;
+    text-align:center;
+    margin:1.8mm 0 1.3mm;
+    text-decoration:none;
+    font-size:8.3px;
+    font-weight:bold;
+    line-height:1.15;
+    flex-shrink:0;
+}
+
+.tabla-cts{
+    width:72%!important;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+.tabla-cts th{
+    height:4.2mm;
+    font-size:7.5px;
+}
+
+.tabla-cts td{
+    height:3.4mm;
+    font-size:7.4px;
+    padding:.35mm 1.2mm;
+}
+
+
+/* =========================================================
+   ESTADO DE GENERACIÓN
+========================================================= */
+
+.estado-pdf{
+    margin-top:8px;
+    font-size:11px;
+    font-weight:bold;
+    min-height:16px;
+    text-align:center;
+}
+
+
+/* =========================================================
+   IMPRESIÓN
+========================================================= */
+
+@media print{
+
+    @page{
+
+        size:A4 landscape;
+
+        margin:5mm;
+
+    }
+
+    html,
+    body{
+
+        width:287mm;
+
+        height:auto;
+
+        margin:0;
+
+        padding:0;
+
+        background:#fff;
+
+        overflow:visible;
+
+    }
+
+    body{
+
+        font-size:8px;
+
+    }
+
+    .panel-control{
+
+        display:none!important;
+
+    }
+
+    .estado-pdf{
+
+        display:none!important;
+
+    }
+
+    .pagina{
+
+        width:287mm;
+
+        height:200mm;
+
+        margin:0;
+
+        padding:2mm;
+
+        border:none;
+
+        overflow:hidden;
+
+        page-break-after:always;
+
+        break-after:page;
+
+    }
+
+    .pagina:last-child{
+
+        page-break-after:auto;
+
+        break-after:auto;
+
+    }
+
+    .contenedor-boletas{
+
+        width:100%;
+
+        height:196mm;
+
+        display:flex;
+
+        gap:4mm;
+
+        overflow:hidden;
+
+    }
+
+    .columna-boleta{
+
+        width:calc(50% - 2mm);
+
+        height:196mm;
+
+        overflow:hidden;
+
+    }
+
+    .caja-principal{
+
+        width:100%;
+
+        height:168mm;
+
+        min-height:168mm;
+
+        max-height:168mm;
+
+        overflow:hidden;
+
+        page-break-inside:avoid;
+
+        break-inside:avoid;
+
+    }
+
+    .caja-recibo{
+
+        width:100%;
+
+        height:26mm;
+
+        min-height:26mm;
+
+        max-height:26mm;
+
+        margin-top:2mm;
+
+        overflow:hidden;
+
+        page-break-inside:avoid;
+
+        break-inside:avoid;
+
+    }
+
+    .encabezado-superior{
+
+        height:20mm;
+
+        min-height:20mm;
+
+        max-height:20mm;
+
+        margin-bottom:3mm;
+
+    }
+
+    .grid-datos tr,
+    .tabla-areas tr,
+    .tabla-financiera tr{
+
+        page-break-inside:avoid;
+
+        break-inside:avoid;
+
+    }
+
+}
+
+
+/* =========================================================
+   REFINAMIENTO VISUAL — BOLETA Y CONSTANCIA
+   Sin subrayados decorativos; se conservan lineas de firma.
+========================================================= */
+.titulo-principal{
+    color:#173b61;
+    font-size:10px;
+    letter-spacing:.05px;
+    text-decoration:none;
+}
+.empresa-nombre{
+    color:#24374b;
+}
+.encabezado-superior{
+    border-bottom:1px solid #9aa9b8;
+}
+.grid-datos tr:first-child td{
+    border-bottom:1px solid #d5dee6;
+}
+.grid-datos .negrita{
+    color:#263a51;
+}
+.texto-rojo{
+    color:#173b61;
+    font-weight:700;
+}
+.resaltado-amarillo{
+    background:none;
+    color:#173b61;
+    font-weight:700;
+    padding:0;
+}
+.subrayado{
+    text-decoration:none;
+    font-weight:700;
+}
+.tabla-areas th,
+.tabla-financiera th{
+    color:#20384d;
+    background:#eaf0f6;
+    border-top:1px solid #c7d4df;
+    border-bottom:1px solid #c7d4df;
+}
+.tabla-areas td{
+    border-bottom:1px solid #e7edf2;
+    font-variant-numeric:tabular-nums;
+}
+.tabla-areas .celda-area{
+    font-weight:700;
+}
+.tabla-areas .linea-detalle{
+    margin:.22mm 0;
+}
+.tabla-financiera td{
+    font-variant-numeric:tabular-nums;
+}
+.fila-neto{
+    background:#edf3f9;
+}
+.fila-neto td{
+    color:#123b63;
+    border-top:1px solid #9aaebf!important;
+    border-bottom:1px solid #9aaebf!important;
+}
+.titulo-recibo,
+.titulo-cts{
+    text-decoration:none;
+    color:#173b61;
+}
+.caja-principal,
+.caja-recibo{
+    border-color:#7e8c9b;
+}
+/* Las lineas bajo las firmas son necesarias para firmar. */
+@media screen{
+    body{
+        background:#eef2f7;
+    }
+    .pagina{
+        box-shadow:0 11px 35px rgba(20,42,65,.14);
+        border-color:#d6dee7;
+    }
+}
+@media print{
+    .pagina{
+        box-shadow:none!important;
+    }
+}
+
+/* Panel de emision masiva — solo pantalla */
+@media screen{
+    .panel-control{
+        width:min(287mm, calc(100% - 24px));
+        margin:14px auto 18px;
+        padding:18px 20px;
+        border:1px solid #dce5ed;
+        border-radius:12px;
+        box-shadow:0 5px 22px rgba(25,55,90,.08);
+    }
+    .titulo-control{
+        text-align:left;
+        font-size:18px;
+        color:#173b61;
+        margin-bottom:14px;
+    }
+    .controles-superiores{gap:9px;}
+    .controles-superiores input{border:1px solid #c4d3e0;border-radius:8px;min-width:210px;}
+    .boton-control{border-radius:7px;min-height:35px;}
+    .lista-trabajadores{border:1px solid #dce5ed;border-radius:9px;background:#fff;}
+    .trabajador-item:hover{background:#f0f5fb;}
+    .contador{color:#486077;font-size:12px;}
+}
+@media screen and (max-width:720px){
+    .panel-control{padding:14px;}
+    .controles-superiores input{width:100%;flex-basis:100%;}
+    .boton-control{flex:1 1 auto;}
+}
+
+
+/* Anexos de detalle: una hoja adicional cuando existen muchas áreas. */
+.pagina-anexo { margin-top:5mm; padding:9mm; overflow:hidden; }
+.anexo-contenido{font:11px Arial,sans-serif;color:#203346;}
+.anexo-cabecera{display:flex;justify-content:space-between;gap:15mm;align-items:flex-start;border-bottom:2px solid #173b61;padding-bottom:5mm;}
+.anexo-cabecera h1{font-size:17px;margin:0 0 6px;color:#173b61;}
+.anexo-cabecera p{font-size:11px;margin:0;}
+.anexo-numero{font-weight:700;white-space:nowrap;}
+.anexo-identificacion{margin:6mm 0;display:flex;justify-content:space-between;gap:10mm;font-size:12px;}
+.anexo-nota{font-size:10px;line-height:1.35;margin:0 0 5mm;color:#526779;}
+.anexo-tabla{width:100%;border-collapse:collapse;table-layout:fixed;}
+.anexo-tabla th{padding:3mm 2mm;background:#eaf0f6;color:#20384d;text-align:center;border:1px solid #b9c8d6;font-size:10px;}
+.anexo-tabla td{padding:2.2mm 2mm;border-bottom:1px solid #d8e2eb;text-align:center;font-size:10px;}
+.anexo-tabla td:first-child{text-align:left;font-weight:600;overflow-wrap:anywhere;}
+.anexo-pie{margin-top:6mm;color:#526779;font-size:10px;}
+@media print{
+    .pagina-anexo{margin:0;box-shadow:none;border:none;break-before:page;page-break-before:always;}
+    .pagina-anexo .anexo-contenido{color:#000;}
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================================================
+     PANEL DE CONTROL
+========================================================= -->
+
+<div class="panel-control">
+
+
+    <div class="titulo-control">
+        Impresión masiva · Semana {{ semana }}
+    </div>
+
+
+    <div class="controles-superiores">
+
+
+        <input
+            type="text"
+            id="buscarTrabajador"
+            placeholder="Buscar por DNI o nombre..."
+            autocomplete="off"
+        >
+
+
+        <button
+            type="button"
+            class="boton-control boton-verde"
+            onclick="seleccionarTodos()"
+        >
+            SELECCIONAR TODOS
+        </button>
+
+
+        <button
+            type="button"
+            class="boton-control"
+            onclick="deseleccionarTodos()"
+        >
+            DESELECCIONAR TODOS
+        </button>
+
+
+        <button
+            type="button"
+            class="boton-control boton-verde"
+            onclick="imprimirSeleccionados()"
+        >
+            🖨 IMPRIMIR SELECCIONADOS
+        </button>
+
+
+        <button
+            type="button"
+            class="boton-control boton-pdf"
+            id="btnDescargarPDF"
+            onclick="descargarPDFMasivo()"
+        >
+            📥 DESCARGAR PDF MASIVO
+        </button>
+
+
+        <button
+            type="button"
+            class="boton-control boton-rojo"
+            onclick="window.location.href='{{ url_for('resultados') }}'"
+        >
+            ← RESULTADOS
+        </button>
+
+    </div>
+
+
+    <div class="contador">
+
+        Seleccionados:
+
+        <span id="contadorSeleccionados">
+            0
+        </span>
+
+        /
+
+        {{ trabajadores|length }}
+
+    </div>
+
+
+    <div
+        class="estado-pdf"
+        id="estadoPDF"
+    ></div>
+
+
+    <div
+        class="lista-trabajadores"
+        id="listaTrabajadores"
+    >
+
+
+        {% for trabajador in trabajadores %}
+
+
+        <label
+            class="trabajador-item"
+            data-dni="{{ trabajador.dni }}"
+            data-nombre="{{ trabajador.nombre|lower }}"
+        >
+
+
+            <input
+                type="checkbox"
+                class="check-trabajador"
+                value="{{ trabajador.dni }}"
+                checked
+                onchange="actualizarSeleccion()"
+            >
+
+
+            <div class="dato-trabajador">
+
+
+                <span class="nombre-trabajador">
+                    {{ trabajador.nombre }}
+                </span>
+
+
+                <span class="dni-trabajador">
+                    DNI: {{ trabajador.dni }}
+                </span>
+
+
+                {% if trabajador.areas_texto %}
+
+
+                <span class="areas-trabajador">
+
+                    Áreas:
+                    {{ trabajador.areas_texto }}
+
+                </span>
+
+
+                {% endif %}
+
+
+            </div>
+
+
+        </label>
+
+
+        {% endfor %}
+
+
+    </div>
+
+
+</div>
+
+
+<!-- =========================================================
+     BOLETAS
+========================================================= -->
+
+{% for trabajador in trabajadores %}
+
+
+<div
+    class="pagina pagina-trabajador"
+    data-dni="{{ trabajador.dni }}"
+>
+
+
+<div class="contenedor-boletas">
+
+
+<!-- =========================================================
+     IZQUIERDA - BOLETA
+========================================================= -->
+
+<div class="columna-boleta">
+
+
+<div class="caja-principal">
+
+
+<div class="encabezado-superior">
+
+
+    <div class="logo-contenedor">
+
+
+        <img
+            src="/uploads/logo.jpg"
+            alt="Logo"
+            class="logo-img"
+            onerror="this.style.display='none'"
+        >
+
+
+    </div>
+
+
+    <div class="titulo-centro">
+
+
+        <div class="titulo-principal">
+
+            BOLETA CANCELATORIA SEMANAL
+
+        </div>
+
+
+        <div class="empresa-nombre">
+
+            P Y S DEL MAR PERU S.A.C.<br>
+
+            RUC: 20615706427
+
+        </div>
+
+
+    </div>
+
+
+    <div></div>
+
+
+</div>
+
+
+<table class="grid-datos">
+
+
+<tr>
+
+
+    <td
+        class="negrita"
+        width="22%"
+    >
+
+        APELLIDOS Y NOMBRES:
+
+    </td>
+
+
+    <td
+        colspan="3"
+        class="negrita"
+    >
+
+        {{ trabajador.nombre }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td class="negrita">
+
+        TIPO DOCUM:
+
+    </td>
+
+
+    <td
+        class="centro"
+        width="28%"
+    >
+
+        {{
+            trabajador.tipo_documento
+            if trabajador.tipo_documento
+            else '—'
+        }}
+
+    </td>
+
+
+    <td
+        class="negrita"
+        width="22%"
+    >
+
+        REGIMEN PENS:
+
+    </td>
+
+
+    <td width="28%">
+        {{
+            trabajador.regimen
+            if trabajador.regimen
+            else '—'
+        }}
+        {% if trabajador.tipo_regimen %}
+            - {{ trabajador.tipo_regimen }}
+        {% endif %}
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td class="negrita">
+
+        N° DOCUMENTO:
+
+    </td>
+
+
+    <td class="negrita centro">
+
+        {{ trabajador.dni }}
+
+    </td>
+
+
+    <td class="negrita">
+
+        TN (DESTAJO):
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            "%.3f"|format(
+                trabajador.total_tn
+            )
+            if trabajador.total_tn > 0
+            else '.'
+        }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td class="negrita">
+
+        SEMANA:
+
+    </td>
+
+
+    <td class="negrita centro">
+
+        {{ semana }}
+
+    </td>
+
+
+    {% if trabajador.total_horas > 0 %}
+
+
+    <td class="negrita">
+
+        TOTAL H. EST:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_estandar
+            )|numero_limpio
+            if trabajador.horas_estandar > 0
+            else '.'
+        }}
+
+    </td>
+
+
+    {% else %}
+
+
+    <td colspan="2"></td>
+
+
+    {% endif %}
+
+
+</tr>
+
+
+<tr>
+
+
+    <td class="negrita">
+
+        DIAS TRABAJADOS:
+
+    </td>
+
+
+    <td class="negrita centro">
+
+        {{
+            "%.0f"|format(
+                trabajador.dias_trabajados
+            )
+        }}
+
+    </td>
+
+
+    {% if trabajador.total_horas > 0 %}
+
+
+    <td class="negrita">
+
+        TOTAL HE 25%:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_25
+            )|numero_limpio
+            if trabajador.horas_25 > 0
+            else '.'
+        }}
+
+    </td>
+
+
+    {% else %}
+
+
+    <td colspan="2"></td>
+
+
+    {% endif %}
+
+
+</tr>
+
+
+<tr>
+
+
+    <td class="negrita">
+
+        PERIODO:
+
+    </td>
+
+
+    <td class="centro">
+
+
+        <span class="resaltado-amarillo">
+
+            {{ periodo }}
+
+        </span>
+
+
+    </td>
+
+
+    {% if trabajador.total_horas > 0 %}
+
+
+    <td class="negrita">
+
+        TOTAL HE 35%:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_35
+            )|numero_limpio
+            if trabajador.horas_35 > 0
+            else '.'
+        }}
+
+    </td>
+
+
+    {% else %}
+
+
+    <td colspan="2"></td>
+
+
+    {% endif %}
+
+
+</tr>
+
+
+{% if trabajador.total_horas > 0 %}
+
+
+<tr>
+
+
+    <td class="texto-rojo">
+
+        HORAS SEMANALES:
+
+    </td>
+
+
+    <td class="texto-rojo centro">
+
+        {{
+            (
+                trabajador.total_horas
+            )|numero_limpio
+        }}
+
+    </td>
+
+
+    <td class="negrita">
+
+        TOTAL HE 100%:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_100
+            )|numero_limpio
+            if trabajador.horas_100 > 0
+            else '.'
+        }}
+
+    </td>
+
+
+</tr>
+
+
+{% endif %}
+
+
+</table>
+
+
+<!-- =========================================================
+     DETALLE POR ÁREA
+========================================================= -->
+
+{% if trabajador.detalle_areas %}
+
+
+<table class="tabla-areas">
+
+
+<thead>
+
+
+<tr>
+
+
+    <th width="40%">
+
+        ÁREA
+
+    </th>
+
+
+    <th width="28%">
+
+        TN / HORAS
+
+    </th>
+
+
+    <th width="32%">
+
+        REMUNERACIÓN / VALOR TN
+
+    </th>
+
+
+</tr>
+
+
+</thead>
+
+
+<tbody>
+
+
+{% for detalle in trabajador.detalle_areas_principal %}
+
+
+<tr>
+
+
+    <td class="celda-area">
+
+        {{ detalle.area }}
+
+    </td>
+
+
+    <td class="celda-cantidad">
+
+        {% if detalle.tiene_tn %}
+
+            <span class="linea-detalle">
+                TN: {{ "%.3f"|format(detalle.total_tn) }}
+            </span>
+
+        {% endif %}
+
+        {% if detalle.tiene_horas %}
+
+            <span class="linea-detalle">
+                HRS: {{ "%.3f"|format(detalle.total_horas) }}
+            </span>
+
+        {% endif %}
+
+    </td>
+
+
+    <td class="celda-valores">
+
+        {% if detalle.tiene_horas %}
+
+            <span class="linea-detalle">
+                REM. REF.: S/. {{ detalle.remuneracion|numero_limpio }}
+            </span>
+
+        {% endif %}
+
+        {% if detalle.tiene_tn %}
+
+            <span class="linea-detalle">
+                V/TN: S/. {{ detalle.valor_tn|numero_limpio }}
+            </span>
+
+        {% endif %}
+
+    </td>
+
+
+</tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+
+{% if trabajador.detalle_areas_anexos %}
+<tr><td colspan="3" style="text-align:left;font-size:7px;padding:1mm">Detalle adicional de áreas: ver anexo ({{ trabajador.detalle_areas_anexos|length }} hoja(s)).</td></tr>
+{% endif %}
+
+</table>
+
+
+{% endif %}
+
+
+<!-- =========================================================
+     TABLA FINANCIERA
+========================================================= -->
+
+<table class="tabla-financiera">
+
+
+<thead>
+
+
+<tr>
+
+
+    <th width="32%">
+
+        CONCEPTO (INGRESOS)
+
+    </th>
+
+
+    <th
+        width="18%"
+        class="text-right"
+    >
+
+        IMPORTE
+
+    </th>
+
+
+    <th width="32%">
+
+        CONCEPTO (DESCUENTOS)
+
+    </th>
+
+
+    <th
+        width="18%"
+        class="text-right"
+    >
+
+        IMPORTE
+
+    </th>
+
+
+</tr>
+
+
+</thead>
+
+
+<tbody>
+
+
+<tr class="fila-espaciadora">
+
+    <td colspan="4"></td>
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        REMUN SEMAN:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.basica)) if trabajador.basica != 0 else "—" }}
+
+    </td>
+
+
+    <td>
+
+        FONDO SPP
+        ({{
+            trabajador.regimen
+            if trabajador.regimen
+            else '—'
+        }})
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.fondo_spp)) if trabajador.fondo_spp != 0 else "—" }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        ASIG FAMILIAR:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.asignacion_familiar)) if trabajador.asignacion_familiar != 0 else "—" }}
+
+    </td>
+
+
+    <td>
+
+        PRIMA SPP
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.prima_spp)) if trabajador.prima_spp != 0 else "—" }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        DOMINICAL:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.dominical)) if trabajador.dominical != 0 else "—" }}
+
+    </td>
+
+
+    <td>
+
+        COMISION SPP
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.comision_spp)) if trabajador.comision_spp != 0 else "—" }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        GRATIFICACION (16.67%):
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.gratificacion)) if trabajador.gratificacion != 0 else "—" }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        BONIF EXTRA 9%:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.bono)) if trabajador.bono != 0 else "—" }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        VACACIONES (8.33%):
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.vacaciones)) if trabajador.vacaciones != 0 else "—" }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        CTS (8.56%):
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.cts)) if trabajador.cts != 0 else "—" }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+{% if trabajador.total_horas > 0 %}
+
+
+<tr>
+
+
+    <td>
+
+        TOTAL HE 25%:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.monto_25)) if trabajador.monto_25 != 0 else "—" }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        TOTAL HE 35%:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.monto_35)) if trabajador.monto_35 != 0 else "—" }}
+
+    </td>
+
+
+    <td>
+
+        DESCUENTO PRÉSTAMOS
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{
+            "S/. %.2f"|format(trabajador.descuento_prestamos)
+            if trabajador.descuento_prestamos != 0
+            else '—'
+        }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        TOTAL HE 100%:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.monto_100)) if trabajador.monto_100 != 0 else "—" }}
+
+    </td>
+
+
+    <td>
+
+        DESCUENTO COMIDA
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.descuentos_comida)) if trabajador.descuentos_comida != 0 else "—" }}
+
+    </td>
+
+
+</tr>
+
+
+{% else %}
+
+
+<tr>
+
+
+    <td></td>
+
+    <td></td>
+
+
+    <td>
+
+        DESCUENTO PRÉSTAMOS
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{
+            "S/. %.2f"|format(trabajador.descuento_prestamos)
+            if trabajador.descuento_prestamos != 0
+            else '—'
+        }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td></td>
+
+    <td></td>
+
+
+    <td>
+
+        DESCUENTO COMIDA
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.descuentos_comida)) if trabajador.descuentos_comida != 0 else "—" }}
+
+    </td>
+
+
+</tr>
+
+
+{% endif %}
+
+
+<tr>
+
+
+    <td></td>
+
+    <td></td>
+
+
+    <td>
+
+        DESCUENTOS VARIOS
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.descuentos_varios)) if trabajador.descuentos_varios != 0 else "—" }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        PRÉSTAMOS / ADELANTOS
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{
+            "S/. %.2f"|format(trabajador.prestamos_adelantos)
+            if trabajador.prestamos_adelantos != 0
+            else '—'
+        }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        CONDICION DE TRABAJO
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.condicion_trabajo)) if trabajador.condicion_trabajo != 0 else "—" }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+<tr class="fila-espaciadora">
+
+    <td colspan="4"></td>
+
+</tr>
+
+
+<tr class="linea-arriba negrita">
+
+
+    <td>
+
+        TOTAL INGRESOS
+
+    </td>
+
+
+    <td class="text-right">
+
+        S/.
+
+        {{
+            "%.2f"|format(
+
+                trabajador.basica
+
+                + trabajador.asignacion_familiar
+
+                + trabajador.dominical
+
+                + trabajador.gratificacion
+
+                + trabajador.bono
+
+                + trabajador.vacaciones
+
+                + trabajador.cts
+
+                + trabajador.monto_25
+
+                + trabajador.monto_35
+
+                + trabajador.monto_100
+
+                + trabajador.prestamos_adelantos
+
+                + trabajador.condicion_trabajo
+
+            )
+        }}
+
+    </td>
+
+
+    <td>
+
+        TOTAL DESCUENTOS
+
+    </td>
+
+
+    <td class="text-right">
+
+        S/.
+
+        {{
+            "%.2f"|format(
+
+                trabajador.fondo_spp
+
+                + trabajador.prima_spp
+
+                + trabajador.comision_spp
+
+                + trabajador.descuento_prestamos
+
+                + trabajador.descuentos_comida
+
+                + trabajador.descuentos_varios
+
+            )
+        }}
+
+    </td>
+
+
+</tr>
+
+
+<tr class="fila-espaciadora">
+
+    <td colspan="4"></td>
+
+</tr>
+
+
+<tr class="fila-neto">
+
+
+    <td>
+
+        APORTES DEL EMPLEADOR
+
+    </td>
+
+
+    <td></td>
+
+
+    <td>
+
+        NETO A PAGAR
+
+    </td>
+
+
+    <td class="text-right">
+
+        S/.
+        {{
+            "%.2f"|format(
+                trabajador.neto
+            )
+        }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        Essalud:
+
+    </td>
+
+
+    <td class="text-right">
+
+        S/.
+        {{
+            "%.2f"|format(
+                trabajador.essalud
+            )
+        }}
+
+    </td>
+
+
+    <td></td>
+
+    <td></td>
+
+
+</tr>
+
+
+</tbody>
+
+
+</table>
+
+
+<div class="espaciador-flexible"></div>
+
+
+<!-- =========================================================
+     FIRMAS
+========================================================= -->
+
+<div class="seccion-firmas">
+
+
+<div class="bloque-firma">
+
+
+    <div class="contenedor-imagen-firma">
+
+
+        <img
+            src="/uploads/firma.jpg"
+            alt="Firma"
+            class="firma-img"
+            onerror="this.style.display='none'"
+        >
+
+
+    </div>
+
+
+    <div class="linea-texto-firma">
+
+
+        Rosa M. Zapata Socola
+
+
+        <br>
+
+
+        <span class="negrita">
+
+            GERENTE GENERAL
+
+        </span>
+
+
+        <br>
+
+
+        P Y S DEL MAR PERU
+
+
+    </div>
+
+
+</div>
+
+
+<div class="bloque-firma">
+
+
+    <div class="contenedor-imagen-firma"></div>
+
+
+    <div class="linea-texto-firma">
+
+
+        <span class="nombre-firma-boleta">
+
+            {{ trabajador.nombre }}
+
+        </span>
+
+
+        <span class="dni-firma-boleta">
+
+            DNI: {{ trabajador.dni }}
+
+        </span>
+
+
+    </div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<!-- =========================================================
+     RECIBO IZQUIERDO
+========================================================= -->
+
+<div class="caja-recibo">
+
+
+<div class="titulo-recibo">
+
+    RECIBO DE PAGO
+
+</div>
+
+
+<div class="recibo-contenido">
+
+
+<div class="recibo-texto-izquierda">
+
+
+<div class="texto-recibo">
+
+
+    Yo,
+
+
+    <span class="subrayado">
+
+        {{ trabajador.nombre }}
+
+    </span>,
+
+
+    con Tipo Docum.
+
+
+    <span class="subrayado">
+
+
+        {{
+
+            trabajador.tipo_documento
+
+            if trabajador.tipo_documento
+
+            else '—'
+
+        }}
+
+
+    </span>
+
+
+    N°
+
+
+    <span class="subrayado">
+
+        {{ trabajador.dni }}
+
+    </span>.
+
+
+</div>
+
+
+<div class="texto-recibo">
+
+
+    Por concepto de mis labores de la Semana N°
+
+
+    <span class="subrayado">
+
+        {{ semana }}
+
+    </span>
+
+
+    del periodo
+
+
+    <span class="subrayado">
+
+        {{ periodo }}
+
+    </span>.
+
+
+</div>
+
+
+<div class="texto-recibo">
+
+
+    Recibí conforme de
+
+
+    <span class="negrita">
+
+        P Y S DEL MAR PERU SAC
+
+    </span>
+
+
+    el monto de
+
+
+    <span class="subrayado">
+
+        S/. {{ "%.2f"|format(trabajador.neto) }}
+
+    </span>.
+
+
+</div>
+
+
+<div class="texto-recibo">
+
+
+    Mediante la firma del presente documento doy mi
+    conformidad al pago de mi salario semanal que
+    contiene el prorrateo de mis beneficios sociales
+    así como horas extras en caso de haberlas laborado.
+
+
+</div>
+
+
+</div>
+
+
+<div class="recibo-firma-derecha">
+
+
+    <div class="espacio-firma"></div>
+
+
+    <div class="linea-firma">
+
+
+        <span class="nombre-firma">
+
+            {{ trabajador.nombre }}
+
+        </span>
+
+
+        <span class="dni-firma">
+
+            DNI: {{ trabajador.dni }}
+
+        </span>
+
+
+    </div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<!-- =========================================================
+     DERECHA - CTS
+========================================================= -->
+
+<div class="columna-boleta">
+
+
+<div class="caja-principal">
+
+
+<div class="encabezado-superior">
+
+
+    <div class="logo-contenedor">
+
+
+        <img
+            src="/uploads/logo.jpg"
+            alt="Logo"
+            class="logo-img"
+            onerror="this.style.display='none'"
+        >
+
+
+    </div>
+
+
+    <div class="titulo-centro">
+
+
+        <div class="titulo-principal">
+
+
+            CONSTANCIA DE LIQUIDACIÓN DEL PAGO<br>
+            CANCELATORIO EN BOLETA DE PAGO<br>
+            SEMANAL DE CTS
+
+
+        </div>
+
+
+        <div class="empresa-nombre">
+
+
+            P Y S DEL MAR PERU S.A.C.<br>
+
+            RUC: 20615706427
+
+
+        </div>
+
+
+    </div>
+
+
+    <div></div>
+
+
+</div>
+
+
+<div class="texto-legal-cts">
+
+
+<span class="negrita">
+
+    P Y S DEL MAR PERU S.A.C. RUC: 20615706427
+
+</span>,
+
+
+domiciliado en CAL.MOYOPAMPA NRO. 250 DPTO. A
+URB. SANTA EULALIA LIMA - LIMA - SAN MIGUEL,
+representado por su Titular Gerente General
+ZAPATA SOCOLA ROSA MERCEDES, identificado con
+DNI N° 02806183, en aplicación del artículo 24º
+del TUO del D.Leg. Nº 650, Ley de Compensación
+por Tiempo de Servicios aprobado mediante el
+D.S. Nº 001-97-TR otorga a:
+
+
+<span class="negrita">
+
+    {{ trabajador.nombre }}
+
+</span>
+
+
+&nbsp;&nbsp;
+
+
+<span class="negrita">
+
+    DNI: {{ trabajador.dni }}
+
+</span>
+
+
+<br><br>
+
+
+La presente constancia del pago realizado en
+avance de partes de su Compensación por Tiempo
+de Servicios corresponde a la semana comprendida
+entre el:
+
+
+<span class="negrita">
+
+    {{ periodo }}
+
+</span>
+
+
+&nbsp;&nbsp;
+
+
+SEMANA:
+
+
+<span class="negrita">
+
+    {{ semana }}
+
+</span>
+
+
+</div>
+
+
+<table class="grid-datos">
+
+
+<tr>
+
+
+    <td
+        width="25%"
+        class="negrita"
+    >
+
+        DIAS TRABAJADOS:
+
+    </td>
+
+
+    <td
+        width="25%"
+        class="negrita centro"
+    >
+
+        {{
+            "%.0f"|format(
+                trabajador.dias_trabajados
+            )
+        }}
+
+    </td>
+
+
+    <td width="25%"></td>
+
+
+    <td width="25%"></td>
+
+
+</tr>
+
+
+{% if trabajador.total_horas > 0 %}
+
+
+<tr>
+
+
+    <td class="negrita">
+
+        TOTAL H. EST:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_estandar
+            )|numero_limpio
+            if trabajador.horas_estandar > 0
+            else '.'
+        }}
+
+
+    </td>
+
+
+    <td class="negrita">
+
+        TOTAL HE 25%:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_25
+            )|numero_limpio
+            if trabajador.horas_25 > 0
+            else '.'
+        }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td class="negrita">
+
+        TOTAL HE 35%:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_35
+            )|numero_limpio
+            if trabajador.horas_35 > 0
+            else '.'
+        }}
+
+
+    </td>
+
+
+    <td class="negrita">
+
+        TOTAL HE 100%:
+
+    </td>
+
+
+    <td class="centro">
+
+        {{
+            (
+                trabajador.horas_100
+            )|numero_limpio
+            if trabajador.horas_100 > 0
+            else '.'
+        }}
+
+
+    </td>
+
+
+</tr>
+
+
+{% endif %}
+
+
+</table>
+
+
+<div class="titulo-cts">
+
+
+    CÁLCULO DEL DEPÓSITO
+
+
+    <br>
+
+
+    (PAGO CANCELATORIO EN BOLETA DE PAGO)
+
+
+</div>
+
+
+<table class="tabla-financiera tabla-cts">
+
+
+<thead>
+
+
+<tr>
+
+
+    <th width="65%">
+
+        CONCEPTO
+
+    </th>
+
+
+    <th
+        width="35%"
+        class="text-right"
+    >
+
+        IMPORTE
+
+    </th>
+
+
+</tr>
+
+
+</thead>
+
+
+<tbody>
+
+
+<tr>
+
+
+    <td>
+
+        REMUN SEMAN:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.basica)) if trabajador.basica != 0 else "—" }}
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        ASIG FAMILIAR:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.asignacion_familiar)) if trabajador.asignacion_familiar != 0 else "—" }}
+
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        DOMINICAL:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.dominical)) if trabajador.dominical != 0 else "—" }}
+
+
+    </td>
+
+
+</tr>
+
+
+{% if trabajador.total_horas > 0 %}
+
+
+<tr>
+
+
+    <td>
+
+        TOTAL HE 25%:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.monto_25)) if trabajador.monto_25 != 0 else "—" }}
+
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        TOTAL HE 35%:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.monto_35)) if trabajador.monto_35 != 0 else "—" }}
+
+
+    </td>
+
+
+</tr>
+
+
+<tr>
+
+
+    <td>
+
+        TOTAL HE 100%:
+
+    </td>
+
+
+    <td class="text-right">
+
+        {{ ("S/. %.2f"|format(trabajador.monto_100)) if trabajador.monto_100 != 0 else "—" }}
+
+
+    </td>
+
+
+</tr>
+
+
+{% else %}
+
+
+<tr>
+
+    <td>&nbsp;</td>
+
+    <td></td>
+
+</tr>
+
+
+<tr>
+
+    <td>&nbsp;</td>
+
+    <td></td>
+
+</tr>
+
+
+<tr>
+
+    <td>&nbsp;</td>
+
+    <td></td>
+
+</tr>
+
+
+{% endif %}
+
+
+<tr class="linea-arriba negrita">
+
+
+    <td>
+
+        TOTAL CTS
+
+    </td>
+
+
+    <td class="text-right">
+
+        S/.
+        {{ "%.2f"|format(
+            trabajador.cts
+        ) }}
+
+    </td>
+
+
+</tr>
+
+
+</tbody>
+
+
+</table>
+
+
+<div class="espaciador-flexible"></div>
+
+
+<div class="seccion-firmas">
+
+
+<div class="bloque-firma">
+
+
+    <div class="contenedor-imagen-firma">
+
+
+        <img
+            src="/uploads/firma.jpg"
+            alt="Firma"
+            class="firma-img"
+            onerror="this.style.display='none'"
+        >
+
+
+    </div>
+
+
+    <div class="linea-texto-firma">
+
+
+        Rosa M. Zapata Socola
+
+
+        <br>
+
+
+        <span class="negrita">
+
+            GERENTE GENERAL
+
+        </span>
+
+
+        <br>
+
+
+        P Y S DEL MAR PERU
+
+
+    </div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+<!-- =========================================================
+     RECIBO CTS
+========================================================= -->
+
+<div class="caja-recibo">
+
+
+<div class="titulo-recibo">
+
+    RECIBO DE PAGO
+
+</div>
+
+
+<div class="recibo-contenido">
+
+
+<div class="recibo-texto-izquierda">
+
+
+<div class="texto-recibo">
+
+
+    Yo,
+
+
+    <span class="subrayado">
+
+        {{ trabajador.nombre }}
+
+    </span>,
+
+
+    con Tipo Docum.
+
+
+    <span class="subrayado">
+
+
+        {{
+
+            trabajador.tipo_documento
+
+            if trabajador.tipo_documento
+
+            else '—'
+
+        }}
+
+
+    </span>
+
+
+    N°
+
+
+    <span class="subrayado">
+
+        {{ trabajador.dni }}
+
+    </span>.
+
+
+</div>
+
+
+<div class="texto-recibo">
+
+
+    Por concepto de mis labores de la Semana N°
+
+
+    <span class="subrayado">
+
+        {{ semana }}
+
+    </span>
+
+
+    del periodo
+
+
+    <span class="subrayado">
+
+        {{ periodo }}
+
+    </span>.
+
+
+</div>
+
+
+<div class="texto-recibo">
+
+
+    Recibí conforme de
+
+
+    <span class="negrita">
+
+        P Y S DEL MAR PERU
+
+    </span>
+
+
+    el monto de CTS
+
+
+    <span class="subrayado">
+
+        S/. {{ "%.2f"|format(
+            trabajador.cts
+        ) }}
+
+    </span>.
+
+
+</div>
+
+
+<div class="texto-recibo">
+
+
+    Mediante la firma del presente documento doy mi
+    conformidad al pago de mi salario semanal que
+    contiene el prorrateo de mis beneficios sociales
+    así como horas extras en caso de haberlas laborado.
+
+
+</div>
+
+
+</div>
+
+
+<div class="recibo-firma-derecha">
+
+
+    <div class="espacio-firma"></div>
+
+
+    <div class="linea-firma">
+
+
+        <span class="nombre-firma">
+
+            {{ trabajador.nombre }}
+
+        </span>
+
+
+        <span class="dni-firma">
+
+            DNI: {{ trabajador.dni }}
+
+        </span>
+
+
+    </div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+{% include "anexo_areas.html" %}
+
+{% endfor %}
+
+
+<!-- =========================================================
+     JAVASCRIPT
+========================================================= -->
+
+<script>
+
+
+/* =========================================================
+   BÚSQUEDA
+========================================================= */
+
+const campoBusqueda =
+    document.getElementById(
+        "buscarTrabajador"
+    );
+
+
+campoBusqueda.addEventListener(
+    "input",
+    function(){
+
+        const texto =
+            this.value
+                .trim()
+                .toLowerCase();
+
+
+        const elementos =
+            document.querySelectorAll(
+                ".trabajador-item"
+            );
+
+
+        elementos.forEach(
+            function(item){
+
+                const nombre =
+                    item.dataset.nombre
+                    || "";
+
+
+                const dni =
+                    item.dataset.dni
+                    || "";
+
+
+                if(
+                    nombre.includes(
+                        texto
+                    )
+                    ||
+                    dni.includes(
+                        texto
+                    )
+                ){
+
+                    item.style.display =
+                        "flex";
+
+                }
+                else{
+
+                    item.style.display =
+                        "none";
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================================
+   ACTUALIZAR CONTADOR
+========================================================= */
+
+function actualizarSeleccion(){
+
+    const checks =
+        document.querySelectorAll(
+            ".check-trabajador"
+        );
+
+
+    let cantidad = 0;
+
+
+    checks.forEach(
+        function(check){
+
+            if(
+                check.checked
+            ){
+
+                cantidad++;
+
+            }
+
+        }
+    );
+
+
+    document.getElementById(
+        "contadorSeleccionados"
+    ).textContent =
+        cantidad;
+
+
+    aplicarVisibilidad();
+
+}
+
+
+/* =========================================================
+   SELECCIONAR TODOS
+========================================================= */
+
+function seleccionarTodos(){
+
+    const checks =
+        document.querySelectorAll(
+            ".check-trabajador"
+        );
+
+
+    checks.forEach(
+        function(check){
+
+            check.checked = true;
+
+        }
+    );
+
+
+    actualizarSeleccion();
+
+}
+
+
+/* =========================================================
+   DESELECCIONAR TODOS
+========================================================= */
+
+function deseleccionarTodos(){
+
+    const checks =
+        document.querySelectorAll(
+            ".check-trabajador"
+        );
+
+
+    checks.forEach(
+        function(check){
+
+            check.checked = false;
+
+        }
+    );
+
+
+    actualizarSeleccion();
+
+}
+
+
+/* =========================================================
+   MOSTRAR / OCULTAR BOLETAS
+========================================================= */
+
+function aplicarVisibilidad(){
+
+    const checks =
+        document.querySelectorAll(
+            ".check-trabajador"
+        );
+
+
+    const seleccionados =
+        new Set();
+
+
+    checks.forEach(
+        function(check){
+
+            if(
+                check.checked
+            ){
+
+                seleccionados.add(
+                    String(
+                        check.value
+                    )
+                );
+
+            }
+
+        }
+    );
+
+
+    const paginas =
+        document.querySelectorAll(
+            ".pagina-trabajador"
+        );
+
+
+    paginas.forEach(
+        function(pagina){
+
+            const dni =
+                String(
+                    pagina.dataset.dni
+                );
+
+
+            if(
+                seleccionados.has(
+                    dni
+                )
+            ){
+
+                pagina.style.display =
+                    "block";
+
+            }
+            else{
+
+                pagina.style.display =
+                    "none";
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =========================================================
+   IMPRIMIR SELECCIONADOS
+========================================================= */
+
+function imprimirSeleccionados(){
+
+    const checks =
+        document.querySelectorAll(
+            ".check-trabajador"
+        );
+
+
+    let cantidad = 0;
+
+
+    checks.forEach(
+        function(check){
+
+            if(
+                check.checked
+            ){
+
+                cantidad++;
+
+            }
+
+        }
+    );
+
+
+    if(
+        cantidad === 0
+    ){
+
+        alert(
+            "Selecciona al menos un trabajador."
+        );
+
+        return;
+
+    }
+
+
+    aplicarVisibilidad();
+
+
+    setTimeout(
+        function(){
+
+            window.print();
+
+        },
+        300
+    );
+
+}
+
+
+/* =========================================================
+   ESPERAR IMÁGENES
+========================================================= */
+
+function esperarImagenes(
+    contenedor
+){
+
+    const imagenes =
+        contenedor.querySelectorAll(
+            "img"
+        );
+
+
+    if(
+        imagenes.length === 0
+    ){
+
+        return Promise.resolve();
+
+    }
+
+
+    const promesas =
+        Array.from(
+            imagenes
+        ).map(
+            function(img){
+
+                return new Promise(
+                    function(resolve){
+
+                        if(
+                            img.complete
+                        ){
+
+                            resolve();
+
+                            return;
+
+                        }
+
+
+                        img.onload =
+                            function(){
+
+                                resolve();
+
+                            };
+
+
+                        img.onerror =
+                            function(){
+
+                                resolve();
+
+                            };
+
+                    }
+                );
+
+            }
+        );
+
+
+    return Promise.all(
+        promesas
+    );
+
+}
+
+
+/* =========================================================
+   DESCARGAR PDF MASIVO
+========================================================= */
+
+async function descargarPDFMasivo(){
+
+    const checks =
+        document.querySelectorAll(
+            ".check-trabajador"
+        );
+
+
+    const seleccionados = [];
+
+
+    checks.forEach(
+        function(check){
+
+            if(
+                check.checked
+            ){
+
+                seleccionados.push(
+                    String(
+                        check.value
+                    )
+                );
+
+            }
+
+        }
+    );
+
+
+    /* =====================================================
+       VALIDAR SELECCIÓN
+    ===================================================== */
+
+    if(
+        seleccionados.length === 0
+    ){
+
+        alert(
+            "Selecciona al menos un trabajador."
+        );
+
+        return;
+
+    }
+
+
+    /* =====================================================
+       REFERENCIAS
+    ===================================================== */
+
+    const boton =
+        document.getElementById(
+            "btnDescargarPDF"
+        );
+
+
+    const estado =
+        document.getElementById(
+            "estadoPDF"
+        );
+
+
+    const textoOriginal =
+        boton.textContent;
+
+
+    boton.disabled = true;
+
+
+    boton.textContent =
+        "⏳ GENERANDO PDF...";
+
+
+    estado.textContent =
+        "Preparando " +
+        seleccionados.length +
+        " boleta(s)...";
+
+
+    try{
+
+        /* =================================================
+           VERIFICAR HTML2CANVAS
+        ================================================= */
+
+        if(
+            typeof html2canvas === "undefined"
+        ){
+
+            throw new Error(
+                "No se pudo cargar html2canvas."
+            );
+
+        }
+
+
+        /* =================================================
+           VERIFICAR JSPDF
+        ================================================= */
+
+        if(
+            !window.jspdf
+            ||
+            !window.jspdf.jsPDF
+        ){
+
+            throw new Error(
+                "No se pudo cargar jsPDF."
+            );
+
+        }
+
+
+        /* =================================================
+           ESPERAR FUENTES
+        ================================================= */
+
+        if(
+            document.fonts
+            &&
+            document.fonts.ready
+        ){
+
+            await document.fonts.ready;
+
+        }
+
+
+        /* =================================================
+           CREAR OBJETO PDF
+        ================================================= */
+
+        const {
+            jsPDF
+        } = window.jspdf;
+
+
+        const pdf =
+            new jsPDF({
+
+                orientation:
+                    "landscape",
+
+                unit:
+                    "mm",
+
+                format:
+                    "a4",
+
+                compress:
+                    true
+
+            });
+
+
+        /* =================================================
+           OBTENER TODAS LAS BOLETAS
+        ================================================= */
+
+        const todasLasPaginas =
+            Array.from(
+                document.querySelectorAll(
+                    ".pagina-trabajador"
+                )
+            );
+
+
+        /* =================================================
+           FILTRAR SELECCIONADAS
+        ================================================= */
+
+        const paginasSeleccionadas =
+            todasLasPaginas.filter(
+                function(pagina){
+
+                    const dni =
+                        String(
+                            pagina.dataset.dni
+                        );
+
+
+                    return seleccionados.includes(
+                        dni
+                    );
+
+                }
+            );
+
+
+        if(
+            paginasSeleccionadas.length === 0
+        ){
+
+            throw new Error(
+                "No se encontraron las boletas seleccionadas."
+            );
+
+        }
+
+
+        /* =================================================
+           PROCESAR UNA BOLETA A LA VEZ
+        ================================================= */
+
+        for(
+            let i = 0;
+            i < paginasSeleccionadas.length;
+            i++
+        ){
+
+            const pagina =
+                paginasSeleccionadas[i];
+
+
+            const numeroActual =
+                i + 1;
+
+
+            estado.textContent =
+                "Generando boleta " +
+                numeroActual +
+                " de " +
+                paginasSeleccionadas.length +
+                "...";
+
+
+            /* =============================================
+               MOSTRAR TEMPORALMENTE LA BOLETA
+            ============================================= */
+
+            const displayOriginal =
+                pagina.style.display;
+
+
+            const visibilityOriginal =
+                pagina.style.visibility;
+
+
+            pagina.style.display =
+                "block";
+
+
+            pagina.style.visibility =
+                "visible";
+
+
+            /* =============================================
+               ESPERAR IMÁGENES
+            ============================================= */
+
+            let canvas;
+            try {
+                await esperarImagenes(pagina);
+
+
+            /* =============================================
+               ESPERAR RENDER
+            ============================================= */
+
+            // Imágenes y fuentes se esperaron antes; no bloquear 200 ms por página.
+            await new Promise(resolve => requestAnimationFrame(resolve));
+
+
+            /* =============================================
+               CAPTURAR BOLETA
+            ============================================= */
+
+                canvas =
+                await html2canvas(
+                    pagina,
+                    {
+
+                        scale:
+                            1.8,
+
+                        useCORS:
+                            true,
+
+                        allowTaint:
+                            true,
+
+                        backgroundColor:
+                            "#ffffff",
+
+                        logging:
+                            false,
+
+                        imageTimeout:
+                            15000,
+
+                        scrollX:
+                            0,
+
+                        scrollY:
+                            -window.scrollY
+
+                    }
+                );
+
+
+            /* =============================================
+               RESTAURAR VISIBILIDAD
+            ============================================= */
+
+            } finally {
+                pagina.style.display = displayOriginal;
+                pagina.style.visibility = visibilityOriginal;
+            }
+
+
+            /* =============================================
+               CONVERTIR CANVAS A IMAGEN
+            ============================================= */
+
+            const imagen =
+                canvas.toDataURL(
+                    "image/jpeg",
+                    0.87
+                );
+
+
+            /* =============================================
+               NUEVA PÁGINA PDF
+            ============================================= */
+
+            if(
+                i > 0
+            ){
+
+                pdf.addPage(
+                    "a4",
+                    "landscape"
+                );
+
+            }
+
+
+            /* =============================================
+               INSERTAR BOLETA
+
+               A4 horizontal:
+               297 x 210 mm
+
+               Boleta:
+               287 x 200 mm
+
+               Margen:
+               5 mm
+            ============================================= */
+
+            pdf.addImage(
+
+                imagen,
+
+                "JPEG",
+
+                5,
+
+                5,
+
+                287,
+
+                200,
+
+                undefined,
+
+                "FAST"
+
+            );
+
+            // Liberar memoria de la captura anterior antes de pasar a otra hoja.
+            canvas.width = 0;
+            canvas.height = 0;
+
+        }
+
+
+        /* =================================================
+           GUARDAR PDF
+        ================================================= */
+
+        estado.textContent =
+            "PDF generado correctamente.";
+
+
+        const semanaArchivo = String({{ semana|tojson }}).replace(/[^a-zA-Z0-9_-]/g, "_");
+        pdf.save("Boletas_Semana_" + semanaArchivo + ".pdf");
+
+
+        /* =================================================
+           MENSAJE BOTÓN
+        ================================================= */
+
+        boton.textContent =
+            "✅ PDF DESCARGADO";
+
+
+        setTimeout(
+            function(){
+
+                boton.textContent =
+                    textoOriginal;
+
+                estado.textContent =
+                    "";
+
+            },
+            3000
+        );
+
+
+    }
+    catch(error){
+
+        console.error(
+            "Error generando PDF:",
+            error
+        );
+
+
+        estado.textContent =
+            "";
+
+
+        alert(
+            "No se pudo generar el PDF.\n\n" +
+            error.message
+        );
+
+
+        boton.textContent =
+            "❌ ERROR PDF";
+
+    }
+    finally{
+
+        boton.disabled =
+            false;
+
+    }
+
+}
+
+
+/* =========================================================
+   INICIO
+========================================================= */
+
+document.addEventListener(
+    "DOMContentLoaded",
+    function(){
+
+        actualizarSeleccion();
+
+    }
+);
+
+</script>
+
+
+</body>
+</html>

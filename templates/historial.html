@@ -1,0 +1,12 @@
+<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Historial | Sistema de Boletas</title><link rel="stylesheet" href="{{ url_for('static',filename='css/sistema.css') }}"></head><body>
+<header class="cabecera-app"><div class="cabecera-app-interior"><a class="marca" href="{{ url_for('index') }}"><span class="marca-icono">P</span><span><strong>P Y S DEL MAR PERU S.A.C.</strong><small>Gestión de boletas de pago</small></span></a><nav class="navegacion"><a href="{{ url_for('index') }}">Inicio</a><a href="{{ url_for('resultados') }}">Resultados</a><a href="{{ url_for('historial') }}" aria-current="page">Historial</a></nav></div></header>
+<main class="contenedor"><section class="presentacion"><span class="capsula">HISTORIAL PRIVADO</span><h1>Planillas procesadas</h1><p>Selecciona una carga anterior para consultar o imprimir sus boletas.</p></section>
+<section class="panel"><div class="panel-cabecera"><div><h2>Semanas guardadas</h2><p class="subtitulo">{{ planillas|length }} carga(s) asociada(s) a tu usuario.</p></div><a href="{{ url_for('index') }}" class="boton">Importar otra planilla</a></div>
+<div class="tabla-contenedor"><table class="tabla-datos"><thead><tr><th>Fecha de carga (UTC)</th><th>Semana</th><th>Período</th><th>Archivo</th><th>Trabajadores</th><th>Alertas</th><th>Acción</th></tr></thead><tbody>
+{% for p in planillas %}
+<tr><td>{{ p.creado_en[:16].replace('T',' ') }}</td><td>{{ p.semana }}</td><td>{{ p.periodo }}</td><td>{{ p.nombre_archivo }}</td><td>{{ p.total_trabajadores }}</td><td>{{ p.n_alertas }}</td>
+<td><form method="post" action="{{ url_for('abrir_planilla',planilla_id=p.id) }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="boton boton-pequeno {{ 'boton-verde' if p.id==actual else '' }}" type="submit">{{ 'Abierta' if p.id==actual else 'Abrir' }}</button></form></td></tr>
+{% else %}<tr><td colspan="7">Aún no hay planillas guardadas en tu cuenta.</td></tr>{% endfor %}
+</tbody></table></div></section>
+</main></body></html>

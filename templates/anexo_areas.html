@@ -1,0 +1,30 @@
+{% for grupo_anexo in trabajador.detalle_areas_anexos %}
+<section class="pagina pagina-trabajador pagina-anexo" data-dni="{{ trabajador.dni }}" aria-label="Anexo de detalle por área">
+  <div class="anexo-contenido">
+    <header class="anexo-cabecera">
+      <div>
+        <h1>ANEXO · DETALLE DE ÁREAS TRABAJADAS</h1>
+        <p>P Y S DEL MAR PERU S.A.C. · Semana {{ semana }} · {{ periodo }}</p>
+      </div>
+      <div class="anexo-numero">Anexo {{ loop.index }} de {{ trabajador.detalle_areas_anexos|length }}</div>
+    </header>
+    <div class="anexo-identificacion"><strong>{{ trabajador.nombre }}</strong><span>{{ trabajador.tipo_documento }}: {{ trabajador.dni }}</span></div>
+    <p class="anexo-nota">Cantidades tomadas de las columnas O (TN) y P (horas) de la plantilla. Remuneración referencial AP y valor TN AQ, según corresponda.</p>
+    <table class="anexo-tabla">
+      <thead><tr><th>ÁREA</th><th>TONELADAS (TN)</th><th>HORAS</th><th>REMUNERACIÓN REFERENCIAL (AP)</th><th>VALOR TN (AQ)</th></tr></thead>
+      <tbody>
+      {% for detalle in grupo_anexo %}
+        <tr>
+          <td>{{ detalle.area }}</td>
+          <td>{{ '%.3f'|format(detalle.total_tn) if detalle.tiene_tn else '—' }}</td>
+          <td>{{ '%.3f'|format(detalle.total_horas) if detalle.tiene_horas else '—' }}</td>
+          <td>{{ 'S/ %.2f'|format(detalle.remuneracion) if detalle.tiene_horas else '—' }}</td>
+          <td>{{ 'S/ %.2f'|format(detalle.valor_tn) if detalle.tiene_tn else '—' }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    <div class="anexo-pie">Este anexo complementa la boleta semanal del mismo trabajador. No sustituye sus totales ni modifica importes de la planilla.</div>
+  </div>
+</section>
+{% endfor %}

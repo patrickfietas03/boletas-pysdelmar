@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="es"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Acceso privado | Sistema de Boletas</title>
+<link rel="stylesheet" href="{{ url_for('static',filename='css/sistema.css') }}">
+</head><body>
+<main class="contenedor" style="max-width:540px;margin-top:8vh">
+<section class="presentacion"><span class="capsula">ACCESO RESTRINGIDO</span>
+<h1>Boletas de pago</h1><p>P Y S DEL MAR PERU S.A.C. · Acceso exclusivo a personal autorizado.</p></section>
+<section class="panel"><h2>Iniciar sesión</h2>
+<p class="subtitulo" style="margin-bottom:19px">Tus planillas y boletas están protegidas mediante tu cuenta.</p>
+{% if error %}<p class="mensaje-error" role="alert">{{ error }}</p>{% endif %}
+<form method="post" action="{{ url_for('login') }}">
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+<div class="campo-formulario"><label for="usuario">Usuario</label><input id="usuario" name="usuario" required autocomplete="username"></div>
+<div class="campo-formulario"><label for="contrasena">Contraseña</label><input id="contrasena" name="contrasena" type="password" required autocomplete="current-password"></div>
+<button type="submit" class="boton" style="width:100%">Ingresar</button>
+</form><p class="texto-ayuda">Para crear tu cuenta por primera vez, ejecuta <code>python configurar_usuario.py</code> en la carpeta del proyecto.</p>
+</section></main></body></html>

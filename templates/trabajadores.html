@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trabajadores | Sistema de Boletas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sistema.css') }}">
+</head>
+<body>
+<header class="cabecera-app">
+    <div class="cabecera-app-interior">
+        <a class="marca" href="{{ url_for('index') }}">
+            <span class="marca-icono">P</span>
+            <span><strong>P Y S DEL MAR PERU S.A.C.</strong><small>Gestión de boletas de pago</small></span>
+        </a>
+        <nav class="navegacion" aria-label="Navegación">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <a href="{{ url_for('resultados') }}">Resultados</a>
+            <a href="{{ url_for('trabajadores') }}" aria-current="page">Trabajadores</a>
+        <a href="{{ url_for('historial') }}">Historial</a>
+<form method="post" action="{{ url_for('salir') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="boton boton-secundario boton-pequeno" type="submit">Salir</button></form>
+</nav>
+    </div>
+</header>
+<main class="contenedor">
+    <div class="miga">Planillas / Trabajadores</div>
+    <section class="presentacion">
+        <span class="capsula">LISTA CONSOLIDADA</span>
+        <h1>Trabajadores · Semana {{ datos.semana }}</h1>
+        <p>Período: {{ datos.periodo }}</p>
+    </section>
+    <section class="panel">
+        <div class="panel-cabecera">
+            <div><h2>Trabajadores registrados</h2><p class="subtitulo">{{ datos.trabajadores|length }} trabajadores consolidados.</p></div>
+            <div class="acciones">
+                <a class="boton boton-secundario" href="{{ url_for('resultados') }}">Volver a resultados</a><a class="boton boton-secundario" href="{{ url_for('validaciones') }}">Validaciones</a>
+                <a class="boton boton-secundario" href="{{ url_for('index') }}">Cargar otro Excel</a>
+            </div>
+        </div>
+        <div class="barra-tabla">
+            <input type="search" class="busqueda" id="buscarTrabajador" placeholder="Buscar por documento, nombre o área" autocomplete="off" aria-label="Buscar trabajador">
+            <span class="contador-tabla" id="cantidadVisible">{{ datos.trabajadores|length }} trabajadores</span>
+        </div>
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead><tr><th>N°</th><th>Documento</th><th>Trabajador</th><th>Áreas</th><th>Modalidad</th><th style="text-align:right">TN</th><th style="text-align:right">Horas</th><th style="text-align:right">Días</th><th style="text-align:right">Neto</th><th>Boleta</th></tr></thead>
+                <tbody>
+                {% for trabajador in datos.trabajadores %}
+                    <tr class="fila-trabajador">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ trabajador.dni }}</td>
+                        <td class="nombre-persona">{{ trabajador.nombre }}</td>
+                        <td class="area">{{ trabajador.areas_texto }}</td>
+                        <td><span class="etiqueta-tipo">{{ trabajador.tipo_trabajo }}</span></td>
+                        <td class="cantidad">{{ '%.3f'|format(trabajador.total_tn) }}</td>
+                        <td class="cantidad">{{ trabajador.total_horas|numero_limpio }}</td>
+                        <td class="cantidad">{{ '%.0f'|format(trabajador.dias_trabajados) }}</td>
+                        <td class="importe"><strong>S/ {{ '%.2f'|format(trabajador.neto) }}</strong></td>
+                        <td><a class="boton boton-pequeno" href="{{ url_for('boleta', dni=trabajador.dni) }}">Ver boleta</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="sin-resultados" id="sinResultados">No se encontraron trabajadores con esa búsqueda.</p>
+    </section>
+    <p class="pie-app">P Y S DEL MAR PERU S.A.C. · Sistema interno de boletas</p>
+</main>
+<script>
+const buscar = document.getElementById('buscarTrabajador');
+const filas = Array.from(document.querySelectorAll('.fila-trabajador'));
+const cantidadVisible = document.getElementById('cantidadVisible');
+const sinResultados = document.getElementById('sinResultados');
+buscar.addEventListener('input', () => {
+    const termino = buscar.value.toLocaleLowerCase('es').trim();
+    let visibles = 0;
+    filas.forEach(fila => {
+        const coincide = fila.textContent.toLocaleLowerCase('es').includes(termino);
+        fila.hidden = !coincide;
+        if (coincide) visibles++;
+    });
+    cantidadVisible.textContent = visibles + ' de ' + filas.length + ' trabajadores';
+    sinResultados.style.display = visibles ? 'none' : 'block';
+});
+</script>
+</body>
+</html>

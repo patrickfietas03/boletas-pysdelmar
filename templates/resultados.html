@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados | Sistema de Boletas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/sistema.css') }}">
+</head>
+<body>
+<header class="cabecera-app">
+    <div class="cabecera-app-interior">
+        <a class="marca" href="{{ url_for('index') }}">
+            <span class="marca-icono">P</span>
+            <span><strong>P Y S DEL MAR PERU S.A.C.</strong><small>Gestión de boletas de pago</small></span>
+        </a>
+        <nav class="navegacion" aria-label="Navegación">
+            <a href="{{ url_for('index') }}">Inicio</a>
+            <a href="{{ url_for('resultados') }}" aria-current="page">Resultados</a>
+            <a href="{{ url_for('trabajadores') }}">Trabajadores</a>
+        <a href="{{ url_for('historial') }}">Historial</a>
+<form method="post" action="{{ url_for('salir') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token() }}"><button class="boton boton-secundario boton-pequeno" type="submit">Salir</button></form>
+</nav>
+    </div>
+</header>
+<main class="contenedor">
+    <div class="miga">Planillas / Resultados</div>
+    <section class="presentacion">
+        <span class="capsula">PLANILLA PROCESADA</span>
+        <h1>Resultados de la semana {{ semana }}</h1>
+        <p>Período: {{ periodo }} · Trabajadores consolidados por documento.</p>
+    </section>
+    {% if alertas %}<div class="mensaje-aviso"><strong>{{ alertas|length }} alerta(s) de validación.</strong> <a href="{{ url_for('validaciones') }}" style="text-decoration:underline">Ver observaciones y filas del Excel</a>. No se han alterado los importes originales.</div>{% endif %}
+    <section class="estadisticas" aria-label="Resumen de planilla">
+        <div class="estadistica"><span class="nombre">Trabajadores</span><span class="valor">{{ trabajadores|length }}</span></div>
+        <div class="estadistica"><span class="nombre">Toneladas registradas</span><span class="valor">{{ '%.3f'|format(trabajadores|sum(attribute='total_tn')) }}</span></div>
+        <div class="estadistica"><span class="nombre">Horas registradas</span><span class="valor">{{ (trabajadores|sum(attribute='total_horas'))|numero_limpio }}</span></div>
+        <div class="estadistica"><span class="nombre">Neto consolidado</span><span class="valor">S/ {{ '%.2f'|format(trabajadores|sum(attribute='neto')) }}</span></div>
+    </section>
+    <section class="panel" aria-label="Acciones de boletas">
+        <div class="panel-cabecera" style="margin-bottom:0">
+            <div>
+                <h2>Emisión de boletas</h2>
+                <p class="subtitulo">Consulta una boleta individual o prepara la impresión masiva.</p>
+            </div>
+            <div class="acciones">
+                <a class="boton boton-verde" href="{{ url_for('boletas_masivas') }}">Impresión masiva</a>
+                <a class="boton boton-secundario" href="{{ url_for('trabajadores') }}">Ver trabajadores</a>
+                <a class="boton boton-secundario" href="{{ url_for('index') }}">Cargar otro Excel</a>
+            </div>
+        </div>
+    </section>
+    <section class="panel" aria-labelledby="titulo-lista">
+        <div class="panel-cabecera">
+            <div><h2 id="titulo-lista">Boletas individuales</h2><p class="subtitulo">Listado de trabajadores de la planilla actual.</p></div>
+        </div>
+        <div class="barra-tabla">
+            <input class="busqueda" type="search" id="buscarTrabajador" placeholder="Buscar por documento, nombre o área" aria-label="Buscar trabajador" autocomplete="off">
+            <span id="cantidadVisible" class="contador-tabla">{{ trabajadores|length }} trabajadores</span>
+        </div>
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead><tr><th>N°</th><th>Documento</th><th>Trabajador</th><th>Áreas</th><th>Modalidad</th><th style="text-align:right">TN</th><th style="text-align:right">Horas</th><th style="text-align:right">Neto</th><th>Boleta</th></tr></thead>
+                <tbody>
+                {% for trabajador in trabajadores %}
+                    <tr class="fila-trabajador">
+                        <td>{{ loop.index }}</td>
+                        <td>{{ trabajador.dni }}</td>
+                        <td class="nombre-persona">{{ trabajador.nombre }}</td>
+                        <td class="area">{{ trabajador.areas_texto }}</td>
+                        <td><span class="etiqueta-tipo">{{ trabajador.tipo_trabajo }}</span></td>
+                        <td class="cantidad">{{ '%.3f'|format(trabajador.total_tn) }}</td>
+                        <td class="cantidad">{{ trabajador.total_horas|numero_limpio }}</td>
+                        <td class="importe"><strong>S/ {{ '%.2f'|format(trabajador.neto) }}</strong></td>
+                        <td><a class="boton boton-pequeno" href="{{ url_for('boleta', dni=trabajador.dni) }}">Ver boleta</a></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <p class="sin-resultados" id="sinResultados">No se encontraron trabajadores con esa búsqueda.</p>
+    </section>
+    <p class="pie-app">P Y S DEL MAR PERU S.A.C. · Sistema interno de boletas</p>
+</main>
+<script>
+const buscar = document.getElementById('buscarTrabajador');
+const filas = Array.from(document.querySelectorAll('.fila-trabajador'));
+const cantidadVisible = document.getElementById('cantidadVisible');
+const sinResultados = document.getElementById('sinResultados');
+buscar.addEventListener('input', () => {
+    const termino = buscar.value.toLocaleLowerCase('es').trim();
+    let visibles = 0;
+    filas.forEach(fila => {
+        const coincide = fila.textContent.toLocaleLowerCase('es').includes(termino);
+        fila.hidden = !coincide;
+        if (coincide) visibles++;
+    });
+    cantidadVisible.textContent = visibles + ' de ' + filas.length + ' trabajadores';
+    sinResultados.style.display = visibles ? 'none' : 'block';
+});
+</script>
+</body>
+</html>
