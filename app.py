@@ -6,7 +6,7 @@ import pandas as pd
 from datetime import timedelta
 from pathlib import Path
 from flask import session, abort
-from almacen import obtener_clave, verificar_usuario, guardar_planilla, cargar_planilla, historial_usuario
+from almacen import obtener_clave, conexion, guardar_planilla, cargar_planilla, historial_usuario
 from validaciones import revisar_excel, asegurar_estructura, revisar_formulas_sin_resultado
 from flask import (
     Flask,
@@ -1253,18 +1253,49 @@ def login():
         if len(fallas) >= 8:
             error = 'Demasiados intentos. Intenta nuevamente dentro de unos minutos.'
         else:
-            usuario = verificar_usuario(request.form.get('usuario',''),
-                                       request.form.get('contrasena',''))
-            if not usuario:
+            # Credenciales únicas definidas en Render > Environment.
+            usuario_ingresado = request.form.get('usuario', '').strip()
+            clave_ingresada = request.form.get('contrasena', '')
+            clave_configurada = os.environ.get('BOLETAS_PASSWORD', '')
+            usuario_configurado = os.environ.get('BOLETAS_USUARIO', 'PYSDELMAR')
+
+            credenciales_validas = (
+                len(clave_configurada) >= 12
+                and secrets.compare_digest(usuario_ingresado, usuario_configurado)
+                and secrets.compare_digest(clave_ingresada, clave_configurada)
+            )
+
+            if not credenciales_validas:
                 fallas.append(ahora)
                 _INTENTOS[ip] = fallas
                 error = 'Usuario o contraseña incorrectos.'
             else:
+                # La base SQLite se conserva para el historial de planillas.
+                # Creamos el registro del usuario automáticamente, sin Shell.
+                # No guardamos BOLETAS_PASSWORD en la base de datos.
+                from datetime import datetime, timezone
+                from werkzeug.security import generate_password_hash
+
+                with conexion() as con:
+                    con.execute(
+                        'INSERT OR IGNORE INTO usuarios '
+                        '(usuario, contrasena_hash, creado_en) VALUES (?, ?, ?)',
+                        (
+                            usuario_configurado,
+                            generate_password_hash(secrets.token_urlsafe(32)),
+                            datetime.now(timezone.utc).isoformat(timespec='seconds')
+                        )
+                    )
+                    cuenta = con.execute(
+                        'SELECT id FROM usuarios WHERE usuario = ? COLLATE NOCASE',
+                        (usuario_configurado,)
+                    ).fetchone()
+
                 _INTENTOS.pop(ip, None)
                 session.clear()
                 session.permanent = True
-                session['usuario_id'] = usuario['id']
-                session['usuario_nombre'] = usuario['usuario']
+                session['usuario_id'] = cuenta['id']
+                session['usuario_nombre'] = usuario_configurado
                 return redirect(url_for('index'))
     return render_template('login.html', error=error)
 
